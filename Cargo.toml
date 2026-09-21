@@ -1,10 +1,10 @@
 [package]
-name = "water-novel"
+name = "novellava"
 version = "0.1.0"
 edition = "2024"
 
 [[bin]]
-name = "water-novel"
+name = "novellava"
 path = "src/bin/main.rs"
 
 [dependencies]
