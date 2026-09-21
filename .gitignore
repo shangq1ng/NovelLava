@@ -1,3 +1,5 @@
 /target
 .env
 .idea/
+meilisearch_data/
+data.ms/
