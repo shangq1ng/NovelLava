@@ -1532,6 +1532,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "novellava"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "dotenv",
+ "meilisearch-sdk",
+ "oauth2",
+ "reqwest",
+ "rust-s3",
+ "serde",
+ "sqlx",
+ "subtle",
+ "thiserror 2.0.20",
+ "tokio",
+ "tower-http 0.7.1",
+ "tower-sessions",
+ "tower-sessions-redis-store",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "ntapi"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3229,29 +3252,6 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
-]
-
-[[package]]
-name = "water-novel"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "axum",
- "dotenv",
- "meilisearch-sdk",
- "oauth2",
- "reqwest",
- "rust-s3",
- "serde",
- "sqlx",
- "subtle",
- "thiserror 2.0.20",
- "tokio",
- "tower-http 0.7.1",
- "tower-sessions",
- "tower-sessions-redis-store",
- "tracing",
- "tracing-subscriber",
 ]
 
 [[package]]
