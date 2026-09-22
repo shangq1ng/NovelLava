@@ -6,7 +6,8 @@
 
 > Work in progress!
 
-# What works so far!
-![Meilisearch](./docs/demo/img.png)
+# What works as of now!
+- Sign Up
+- Normal Search, Paginated Search, Filtered Search
 # LICENSE
 Apache-2.0
