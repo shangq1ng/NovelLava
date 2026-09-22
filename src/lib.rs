@@ -1,16 +1,23 @@
-pub mod auth;
-pub mod config;
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+use crate::models::config::models::{AppConfig, DatabaseConfig, MeilisearchConfig};
+use axum::Router;
+use axum::routing::get;
+use crate::handlers::meilisearch::services::search;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+pub mod handlers;
+pub mod models;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+pub async fn app() -> anyhow::Result<()> {
+    dotenv::dotenv().ok();
+    let db = DatabaseConfig::new().await?;
+    let meilisearch = MeilisearchConfig::new().await?;
+    let state = AppConfig {
+        database: db,
+        meilisearch,
+    };
+    let router: Router = Router::new()
+        .route("/api/search", get(search))
+        .with_state(state);
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000").await?;
+    axum::serve(listener, router).await?;
+    Ok(())
 }
