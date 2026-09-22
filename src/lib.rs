@@ -1,7 +1,7 @@
+use crate::handlers::meilisearch::services::search;
 use crate::models::config::models::{AppConfig, DatabaseConfig, MeilisearchConfig};
 use axum::Router;
 use axum::routing::get;
-use crate::handlers::meilisearch::services::search;
 
 pub mod handlers;
 pub mod models;
