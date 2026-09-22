@@ -50,7 +50,7 @@ async fn main() -> anyhow::Result<()> {
 
     let indexxer = client
         .index("novels")
-        .add_or_replace(&[novel], Some("id"))
+        .add_or_replace(&novel, Some("id"))
         .await?;
 
     indexxer.wait_for_completion(&client, None, None).await?;

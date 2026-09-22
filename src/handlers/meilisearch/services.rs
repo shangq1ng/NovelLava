@@ -9,29 +9,22 @@ pub async fn search(
     Query(query): Query<SearchQuery>,
 ) -> Result<Json<SearchResults<MeilisearchResult>>, SearchError> {
     let client = config.meilisearch.meilisearch.index("novels");
-
     client
         .set_filterable_attributes(&["tags", "author"])
         .await?;
-
-    let per_page = query.per_page.unwrap_or(5);
-    let page = query.page.unwrap_or(1);
-
-    if let Some(v) = query.q {
-        client.search().with_query(v.as_str());
+    let mut search = client.search();
+    let SearchQuery {q, filter_by_tags, filter_by_author, page, per_page, ..} = query;
+    search.with_page(page.unwrap_or(1)).with_hits_per_page(per_page.unwrap_or(10));
+    if let Some(v) = &q {
+        search.with_query(v.as_str());
     }
-
-    client.search().with_page(page).with_hits_per_page(per_page);
-
-    if let Some(v) = query.filter_by_tags {
-        client.search().with_filter(v.as_str());
+    if let Some(v) = &filter_by_tags {
+        search.with_filter(v.as_str());
     }
-
-    if let Some(v) = query.filter_by_author {
-        client.search().with_filter(v.as_str());
+    if let Some(v) = &filter_by_author {
+        search.with_filter(v.as_str());
     }
-
-    let result = client.search().execute().await?;
+    let result = search.execute().await?;
 
     Ok(Json(result))
 }
