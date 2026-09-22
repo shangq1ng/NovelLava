@@ -6,5 +6,7 @@
 
 > Work in progress!
 
+# What works so far!
+![Meilisearch](./docs/demo/img.png)
 # LICENSE
 Apache-2.0
