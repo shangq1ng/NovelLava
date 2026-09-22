@@ -15,7 +15,7 @@ pub async fn app() -> anyhow::Result<()> {
         Ok(_) => tracing::info!("Successfully loaded .env"),
         Err(e) => panic!("Error loading .env, {e:?}"),
     }
-    let rate_limit = RateLimit::new(10, 10).await;
+    let rate_limit = RateLimit::new(10, 20).await;
 
     let db = DatabaseConfig::new().await?;
     let meilisearch = MeilisearchConfig::new().await?;
