@@ -13,8 +13,17 @@ pub async fn search(
         .set_filterable_attributes(&["tags", "author"])
         .await?;
     let mut search = client.search();
-    let SearchQuery {q, filter_by_tags, filter_by_author, page, per_page, ..} = query;
-    search.with_page(page.unwrap_or(1)).with_hits_per_page(per_page.unwrap_or(10));
+    let SearchQuery {
+        q,
+        filter_by_tags,
+        filter_by_author,
+        page,
+        per_page,
+        ..
+    } = query;
+    search
+        .with_page(page.unwrap_or(1))
+        .with_hits_per_page(per_page.unwrap_or(10));
     if let Some(v) = &q {
         search.with_query(v.as_str());
     }

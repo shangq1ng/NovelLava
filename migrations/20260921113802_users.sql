@@ -5,8 +5,8 @@ CREATE TABLE users (
     username TEXT NOT NULL UNIQUE,
     display_name TEXT,
     email TEXT NOT NULL UNIQUE,
-    password varchar(10),
-    avatar_url TEXT NOT NULL,
+    password TEXT NOT NULL,
+    avatar_url TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

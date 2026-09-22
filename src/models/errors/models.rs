@@ -69,3 +69,71 @@ impl IntoResponse for SearchError {
         status.into_response()
     }
 }
+
+#[derive(Debug, Error)]
+pub enum AuthError {
+    #[error("Failed to Create Account")]
+    FailedToCreateAccount,
+    #[error("Not Found")]
+    NotFound,
+    #[error(transparent)]
+    SessionError(#[from] tower_sessions::session::Error),
+    #[error(transparent)]
+    Argon2Error(#[from] argon2::Error),
+    #[error(transparent)]
+    HashingError(#[from] argon2::password_hash::Error),
+    #[error(transparent)]
+    Other(#[from] anyhow::Error),
+    #[error(transparent)]
+    ValidationError(#[from] validator::ValidationErrors),
+    #[error(transparent)]
+    SqlxError(#[from] sqlx::Error),
+    #[error(transparent)]
+    RedisErr(#[from] tower_sessions_redis_store::fred::error::Error),
+    #[error(transparent)]
+    UuidConersionError(#[from] uuid::Error),
+}
+
+impl IntoResponse for AuthError {
+    fn into_response(self) -> Response {
+        let status = match self {
+            Self::NotFound => StatusCode::NOT_FOUND,
+            Self::SessionError(e) => {
+                error!("Session Error: {e:?}");
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
+            Self::Argon2Error(e) => {
+                error!("Argon2 Error: {e:?}");
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
+            Self::Other(e) => {
+                error!("Unexpected error {e:?}");
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
+            Self::HashingError(e) => {
+                error!("Hashing Error: {e:?}");
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
+            Self::ValidationError(e) => {
+                error!("Error when validating: {e:?}");
+                StatusCode::UNPROCESSABLE_ENTITY
+            }
+            Self::SqlxError(e) => {
+                error!("Sqlx Error: {e:?}");
+                StatusCode::INTERNAL_SERVER_ERROR
+            },
+            Self::RedisErr(e) => {
+                error!("Redis Err: {e:?}");
+                StatusCode::INTERNAL_SERVER_ERROR
+            },
+            Self::FailedToCreateAccount => {
+                StatusCode::INTERNAL_SERVER_ERROR
+            },
+            Self::UuidConersionError(e) => {
+                error!("Uuid Conersion Error: {e:?}");
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
+        };
+        status.into_response()
+    }
+}

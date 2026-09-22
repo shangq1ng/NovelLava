@@ -15,7 +15,7 @@ pub struct UserEntity {
     pub display_name: Option<String>,
     pub email: String,
     pub password: Option<String>,
-    pub avatar_url: String,
+    pub avatar_url: Option<String>,
     pub created_at: Option<DateTime<Utc>>,
 }
 /// Novel Entity
@@ -53,7 +53,7 @@ impl TryFrom<UserEntity> for CreateUserResponse {
             username: value.username,
             display_name: value.display_name,
             email: value.email,
-            avatar_url: value.avatar_url,
+            avatar_url: value.avatar_url.unwrap_or_default(),
             created_at: value.created_at,
         })
     }

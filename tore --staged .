@@ -1,0 +1,82 @@
+[33mcommit b711ab84da95d5962f4eebd60a18d2d51afe7f7d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31mwater-novel/main[m[33m, [m[1;31mwater-novel/HEAD[m[33m)[m
+Author: shangqing <venerablewuji@gmail.com>
+Date:   Tue Sep 22 19:00:17 2026 +0545
+
+    Chore: Updated README with an demo image
+
+[33mcommit 0b5fc7967dcbff14d1db6fddd06764da01ebdc19[m
+Author: shangqing <venerablewuji@gmail.com>
+Date:   Tue Sep 22 18:52:53 2026 +0545
+
+    Fix: Fixed search() handler that had a subtle bug that ensured that search queries were not being applied
+    
+    Feat: Implemented rate limiter middleware with governor that allows 10 requests per second with a allow burst of 20
+
+[33mcommit bddd9e3a2e75439ee94883add14f4f91a1839149[m
+Author: shangqing <venerablewuji@gmail.com>
+Date:   Tue Sep 22 18:51:20 2026 +0545
+
+    Fix: Fixed search() handler that had a subtle bug that ensured that search queries were not being applied
+
+[33mcommit 1c5f9f880a0908e51e67ea133bcf6eaf80622a3e[m
+Author: shangqing <venerablewuji@gmail.com>
+Date:   Tue Sep 22 16:50:04 2026 +0545
+
+    Refactor: Wrapped dotenv() into a match statement. Either it loads or it crashes with feedback
+
+[33mcommit 350b52899861a6099d38b57c6140a38976fafa1b[m
+Author: shangqing <venerablewuji@gmail.com>
+Date:   Tue Sep 22 15:22:45 2026 +0545
+
+    Chore: Updated README
+
+[33mcommit 072baefb0532e5d6f770de2d576c96805570287c[m
+Author: shangqing <venerablewuji@gmail.com>
+Date:   Tue Sep 22 15:01:48 2026 +0545
+
+    Chore: Updated README.md for consistent package naming
+
+[33mcommit de036a4b7e94248931b9230a4d1640b40a4b03b1[m
+Merge: 95a6354 f3fae2f
+Author: Shangqing <shangqing@noreply.codeberg.org>
+Date:   Tue Sep 22 11:09:49 2026 +0200
+
+    Merge pull request 'Feat: Implemented searching via Meilisearch, allowing filter search, general search & paginated search' (#5) from feature/postgres into main
+    
+    Reviewed-on: https://codeberg.org/Shangqing/NovelLava/pulls/5
+
+[33mcommit f3fae2fb61ef27d22263178715e9ecc05245d6ea[m[33m ([m[1;31mwater-novel/feature/postgres[m[33m, [m[1;32mfeature/postgres[m[33m, [m[1;32mfeature/auth[m[33m)[m
+Author: shangqing <venerablewuji@gmail.com>
+Date:   Tue Sep 22 14:49:18 2026 +0545
+
+    Feat: Implemented searching via Meilisearch, allowing filter search, general search & paginated search
+
+[33mcommit 95a63544fd2d7de40a1cff9ee4e689cd5a3fc8f1[m
+Merge: df165a1 851fd2c
+Author: Shangqing <shangqing@noreply.codeberg.org>
+Date:   Mon Sep 21 14:42:02 2026 +0200
+
+    Merge pull request 'Chore:Add ports to docker-compose' (#4) from feature/docker into main
+    
+    Reviewed-on: https://codeberg.org/Shangqing/NovelLava/pulls/4
+
+[33mcommit 851fd2c52d65a937f3d0132d14a7e8db1e4ff28f[m[33m ([m[1;31mwater-novel/feature/docker[m[33m, [m[1;32mfeature/docker[m[33m)[m
+Author: shangqing <venerablewuji@gmail.com>
+Date:   Mon Sep 21 18:25:35 2026 +0545
+
+    Chore:Add ports to docker-compose
+
+[33mcommit df165a161af6c8acf7b22329183ea9c92a11af4e[m
+Merge: 39f9a8e 0e2721d
+Author: Shangqing <shangqing@noreply.codeberg.org>
+Date:   Mon Sep 21 14:38:59 2026 +0200
+
+    Merge pull request 'Chore: add docker-compose and .env.example' (#3) from feature/docker into main
+    
+    Reviewed-on: https://codeberg.org/Shangqing/NovelLava/pulls/3
+
+[33mcommit 0e2721d5f19c62c4c6b470ad1f499085486fb854[m
+Author: shangqing <venerablewuji@gmail.com>
+Date:   Mon Sep 21 18:23:05 2026 +0545
+
+    Chore: add docker-compose and .env.example
