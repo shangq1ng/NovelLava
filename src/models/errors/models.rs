@@ -15,7 +15,7 @@ impl IntoResponse for MiddlewareError {
     fn into_response(self) -> Response {
         let status_code = match self {
             Self::TooManyRequests(e) => {
-                error!("Too many requests. Please try again later in {e} seconds");
+                tracing::debug!("{e:?}``");
                 StatusCode::TOO_MANY_REQUESTS
             }
         };
