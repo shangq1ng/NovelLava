@@ -7,7 +7,7 @@
 > Work in progress!
 
 # What works as of now!
-- Sign Up
+- Sign Up, Sign In
 - Normal Search, Paginated Search, Filtered Search
 # LICENSE
 Apache-2.0

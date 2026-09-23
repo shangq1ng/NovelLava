@@ -3,6 +3,8 @@ use axum::response::{IntoResponse, Response};
 use thiserror::Error;
 use tracing::error;
 
+//TODO: Fix Status-Code semantic, refactor so not every error is 404/500/etc.
+
 #[derive(Debug, Error)]
 pub enum DatabaseError {
     #[error("Not Found")]
@@ -92,6 +94,8 @@ pub enum AuthError {
     RedisErr(#[from] tower_sessions_redis_store::fred::error::Error),
     #[error(transparent)]
     UuidConersionError(#[from] uuid::Error),
+    #[error(transparent)]
+    PasswordParseError(#[from] argon2::password_hash::phc::Error),
 }
 
 impl IntoResponse for AuthError {
@@ -121,16 +125,18 @@ impl IntoResponse for AuthError {
             Self::SqlxError(e) => {
                 error!("Sqlx Error: {e:?}");
                 StatusCode::INTERNAL_SERVER_ERROR
-            },
+            }
             Self::RedisErr(e) => {
                 error!("Redis Err: {e:?}");
                 StatusCode::INTERNAL_SERVER_ERROR
-            },
-            Self::FailedToCreateAccount => {
-                StatusCode::INTERNAL_SERVER_ERROR
-            },
+            }
+            Self::FailedToCreateAccount => StatusCode::INTERNAL_SERVER_ERROR,
             Self::UuidConersionError(e) => {
                 error!("Uuid Conersion Error: {e:?}");
+                StatusCode::INTERNAL_SERVER_ERROR
+            },
+            Self::PasswordParseError(e) => {
+                error!("Error when parsing password: {e:?}");
                 StatusCode::INTERNAL_SERVER_ERROR
             }
         };

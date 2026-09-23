@@ -30,6 +30,7 @@ tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 validator = { version = "0.21.0", features = ["derive"] }
 uuid = { version = "1.26.1", features = ["v4"] }
+askama = { version = "0.16.1", features = ["derive"] }
 
 
 [profile.release]

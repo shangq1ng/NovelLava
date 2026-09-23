@@ -1,8 +1,9 @@
+use askama::Template;
+use crate::models::db::models::UserEntity;
 use axum::extract::FromRef;
 use oauth2::{EndpointNotSet, EndpointSet};
 use serde::{Deserialize, Serialize};
 use validator::Validate;
-use crate::models::db::models::UserEntity;
 
 pub type Client = oauth2::basic::BasicClient<
     EndpointSet,
@@ -38,7 +39,6 @@ impl FromRef<AuthConfig> for Client {
     }
 }
 
-
 #[derive(Deserialize, Validate, Debug)]
 pub struct SignUpRequest {
     pub username: String,
@@ -47,17 +47,29 @@ pub struct SignUpRequest {
     pub email: String,
     #[validate(length(max = 8))]
     pub password: String,
+    pub avatar_url: Option<String>,
 }
-
+pub struct SignUpResponse {
+    pub username: String,
+    pub display_name: Option<String>,
+    pub email: String,
+    pub avatar_url: Option<String>,
+}
+#[derive(Deserialize, Debug)]
+pub struct SignInRequest {
+    pub username: String,
+    pub email: String,
+    pub password: String,
+}
 #[derive(Serialize, Debug)]
-pub struct SignUpUserIdentity {
+pub struct User {
     pub username: String,
     pub display_name: Option<String>,
     pub email: String,
     pub avatar_url: Option<String>,
 }
 
-impl From<UserEntity> for SignUpUserIdentity {
+impl From<UserEntity> for User {
     fn from(entity: UserEntity) -> Self {
         Self {
             username: entity.username,
@@ -66,4 +78,16 @@ impl From<UserEntity> for SignUpUserIdentity {
             avatar_url: entity.avatar_url,
         }
     }
+}
+
+#[derive(Template)]
+#[template(path = "sign-up.html")]
+pub struct SignUpPage {
+    pub error_msg: Option<String>,
+}
+
+#[derive(Template)]
+#[template(path = "log-in.html")]
+pub struct SignInPage {
+    pub error_msg: Option<String>,
 }
