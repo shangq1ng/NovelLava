@@ -5,6 +5,23 @@ use tracing::error;
 
 //TODO: Fix Status-Code semantic, refactor so not every error is 404/500/etc.
 
+#[derive(Error, Debug)]
+pub enum MiddlewareError {
+    #[error("{0}")]
+    TooManyRequests(String),
+}
+
+impl IntoResponse for MiddlewareError {
+    fn into_response(self) -> Response {
+        let status_code = match self {
+            Self::TooManyRequests(e) => {
+                error!("Too many requests. Please try again later in {e} seconds");
+                StatusCode::TOO_MANY_REQUESTS
+            }
+        };
+        status_code.into_response()
+    }
+}
 #[derive(Debug, Error)]
 pub enum DatabaseError {
     #[error("Not Found")]
@@ -134,7 +151,7 @@ impl IntoResponse for AuthError {
             Self::UuidConersionError(e) => {
                 error!("Uuid Conersion Error: {e:?}");
                 StatusCode::INTERNAL_SERVER_ERROR
-            },
+            }
             Self::PasswordParseError(e) => {
                 error!("Error when parsing password: {e:?}");
                 StatusCode::INTERNAL_SERVER_ERROR

@@ -1,11 +1,11 @@
-use crate::handlers::auth::helpers::{hash_password, verify_password, TemplateRender};
+use crate::handlers::auth::helpers::{TemplateRender, hash_password, verify_password};
 use crate::models::auth::models::{SignInPage, SignUpPage, SignUpRequest, User};
 use crate::models::config::models::AppConfig;
 use crate::models::db::models::UserEntity;
 use crate::models::errors::models::AuthError;
-use axum::{Form, Json};
 use axum::extract::State;
 use axum::response::{IntoResponse, Redirect, Response};
+use axum::{Form, Json};
 use std::str::FromStr;
 use tower_sessions::Session;
 use tracing::error;
@@ -69,7 +69,10 @@ pub async fn sign_in(
         ).fetch_optional(&state.database.db).await?;
         match user {
             Some(user) => {
-                let valid = verify_password(&payload.password, user.password.unwrap_or_default().as_str())?;
+                let valid = verify_password(
+                    &payload.password,
+                    user.password.unwrap_or_default().as_str(),
+                )?;
                 if !valid {
                     Err(AuthError::NotFound)
                 } else {
@@ -90,10 +93,7 @@ pub async fn home() -> Result<String, AuthError> {
     )
 }
 
-pub async fn me(
-    State(state): State<AppConfig>,
-    session: Session,
-) -> Result<Json<User>, AuthError> {
+pub async fn me(State(state): State<AppConfig>, session: Session) -> Result<Json<User>, AuthError> {
     let session = session
         .get::<String>("user_id")
         .await

@@ -1,10 +1,10 @@
 use crate::middleware::models::{RateLimit, extract_header};
+use crate::models::errors::models::MiddlewareError;
 use axum::Json;
-use axum::body::Body;
 use axum::extract::{ConnectInfo, Request, State};
-use axum::http::{HeaderMap, StatusCode};
+use axum::http::HeaderMap;
 use axum::middleware::Next;
-use axum::response::{IntoResponse, Response};
+use axum::response::Response;
 use governor::clock::Clock;
 use serde_json::json;
 use std::net::SocketAddr;
@@ -15,7 +15,7 @@ pub async fn rate_limiter(
     headers: HeaderMap,
     req: Request,
     next: Next,
-) -> Result<Response, Response> {
+) -> Result<Response, MiddlewareError> {
     let key = extract_header(&headers, addr).await;
     match state.limiter.check_key(&key) {
         Ok(()) => Ok(next.run(req).await),
@@ -23,20 +23,13 @@ pub async fn rate_limiter(
             // Calculate remaining wait time
             let wait_time =
                 negative_outcome.wait_time_from(governor::clock::DefaultClock::default().now());
-            let retry_after_secs = wait_time.as_secs().max(1);
+            let _retry_after_secs = wait_time.as_secs().max(1);
 
             let body = Json(json!({
                 "error": "Too Many Requests",
-                "message": "Rate limit exceeded. Please slow down.",
+                "message": "Rate limit exceeded. Please slow down and try again after {retry_after_secs} seconds.",
             }));
-            let response = (
-                StatusCode::TOO_MANY_REQUESTS,
-                [("Retry-After", retry_after_secs.to_string())],
-                body,
-            )
-                .into_response();
-
-            Err(response)
+            Err(MiddlewareError::TooManyRequests(body.to_string()))
         }
     }
 }

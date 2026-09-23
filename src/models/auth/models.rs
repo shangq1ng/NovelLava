@@ -1,5 +1,5 @@
-use askama::Template;
 use crate::models::db::models::UserEntity;
+use askama::Template;
 use axum::extract::FromRef;
 use oauth2::{EndpointNotSet, EndpointSet};
 use serde::{Deserialize, Serialize};
