@@ -1,11 +1,14 @@
+use crate::models::cache::models::Cache;
 use anyhow::{Context, Result};
 use meilisearch_sdk::client::Client;
 use sqlx::postgres::{PgPool, PgPoolOptions};
 use std::env;
+
 #[derive(Clone, Debug)]
 pub struct AppConfig {
     pub database: DatabaseConfig,
     pub meilisearch: MeilisearchConfig,
+    pub cache: Cache,
 }
 
 #[derive(Clone, Debug)]

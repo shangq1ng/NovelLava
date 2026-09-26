@@ -1,9 +1,43 @@
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
+use deadpool_redis::redis::RedisError;
 use thiserror::Error;
 use tracing::error;
 
 //TODO: Fix Status-Code semantic, refactor so not every error is 404/500/etc.
+
+#[derive(Error, Debug)]
+pub enum CacheError {
+    #[error(transparent)]
+    SerdeConversionError(#[from] serde_json::Error),
+    #[error(transparent)]
+    RedisError(#[from] RedisError),
+    #[error("Failed Operation")]
+    Failed,
+    #[error(transparent)]
+    Other(#[from] anyhow::Error),
+}
+
+impl IntoResponse for CacheError {
+    fn into_response(self) -> Response {
+        let status = match self {
+            Self::SerdeConversionError(e) => {
+                tracing::error!("serde conversion error: {}", e);
+                StatusCode::BAD_REQUEST
+            }
+            Self::RedisError(e) => {
+                error!("Redis Error: {e:?}");
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
+            Self::Failed => StatusCode::UNPROCESSABLE_ENTITY, // change to an appropriate status code at a later date.
+            Self::Other(e) => {
+                error!("Unexpected error: {e}");
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
+        };
+        status.into_response()
+    }
+}
 
 #[derive(Error, Debug)]
 pub enum MiddlewareError {

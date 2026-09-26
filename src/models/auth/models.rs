@@ -1,8 +1,9 @@
-use crate::models::db::models::UserEntity;
+use crate::models::db::schema::UserEntity;
 use askama::Template;
 use axum::extract::FromRef;
 use oauth2::{EndpointNotSet, EndpointSet};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 use validator::Validate;
 
 pub type Client = oauth2::basic::BasicClient<
@@ -61,8 +62,9 @@ pub struct SignInRequest {
     pub email: String,
     pub password: String,
 }
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Default)]
 pub struct User {
+    pub id: Uuid,
     pub username: String,
     pub display_name: Option<String>,
     pub email: String,
@@ -72,6 +74,7 @@ pub struct User {
 impl From<UserEntity> for User {
     fn from(entity: UserEntity) -> Self {
         Self {
+            id: entity.id,
             username: entity.username,
             display_name: entity.display_name,
             email: entity.email,
@@ -89,5 +92,11 @@ pub struct SignUpPage {
 #[derive(Template)]
 #[template(path = "log-in.html")]
 pub struct SignInPage {
+    pub error_msg: Option<String>,
+}
+
+#[derive(Template)]
+#[template(path = "home.html")]
+pub struct HomePage {
     pub error_msg: Option<String>,
 }

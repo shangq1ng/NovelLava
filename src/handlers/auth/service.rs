@@ -1,12 +1,12 @@
 use crate::handlers::auth::helpers::{TemplateRender, hash_password, verify_password};
+use crate::handlers::cache::services::{get_user, insert_user};
 use crate::models::auth::models::{SignInPage, SignUpPage, SignUpRequest, User};
 use crate::models::config::models::AppConfig;
-use crate::models::db::models::UserEntity;
+use crate::models::db::schema::UserEntity;
 use crate::models::errors::models::AuthError;
 use axum::extract::State;
 use axum::response::{IntoResponse, Redirect, Response};
 use axum::{Form, Json};
-use std::str::FromStr;
 use tower_sessions::Session;
 use tracing::error;
 use uuid::Uuid;
@@ -45,8 +45,8 @@ pub async fn sign_up(
     match user {
         Some(usr) => {
             tracing::info!("Successfully created user");
-            session.insert("user_id", &usr.id).await?;
             session.cycle_id().await?;
+            session.insert("user_id", &usr.id).await?;
             Ok(Redirect::to("/users/me"))
         }
         None => {
@@ -77,6 +77,7 @@ pub async fn sign_in(
                     Err(AuthError::NotFound)
                 } else {
                     session.cycle_id().await?;
+                    session.insert("user_id", &user.id).await?;
                     Ok(Redirect::to("/users/me"))
                 }
             }
@@ -87,35 +88,42 @@ pub async fn sign_in(
     }
 }
 
-pub async fn home() -> Result<String, AuthError> {
-    Ok(
-        "Hello World".to_string(), // TODO: Change it later
-    )
-}
-
 pub async fn me(State(state): State<AppConfig>, session: Session) -> Result<Json<User>, AuthError> {
     let session = session
-        .get::<String>("user_id")
+        .get::<Uuid>("user_id")
         .await
         .map_err(AuthError::SessionError)?
         .ok_or(AuthError::NotFound)?;
-
-    let user_id = Uuid::from_str(&session)?;
-    if !user_id.is_nil() {
-        let user = sqlx::query_as!(
+    let session_key = session.clone();
+    let usr = get_user(&state, session_key.to_string().as_str()).await.unwrap_or_default();
+    match usr {
+        Some(usr) => Ok(Json(usr)),
+        None => {
+            let user = sqlx::query_as!(
             UserEntity,
             "SELECT id, sub, username, display_name, email, avatar_url, provider, password, created_at FROM users WHERE id = $1",
-            user_id
+            session
         ).fetch_optional(&state.database.db).await?;
 
-        match user {
-            Some(user) => {
-                let response = user.into();
-                Ok(Json(response))
+            match user {
+                Some(user) => {
+                    let response = user.into();
+                    let is_success = insert_user(&state, &response, session_key.to_string().as_str()).await.unwrap_or(Some(false));
+                    match is_success {
+                        Some(true) => {
+                            // do nothing
+                        },
+                        Some(false) => {
+                            error!("Failed to insert user")
+                        }
+                        None => {
+                            error!("It didn't insert, nor did it failed to insert. Something's wrong with the logic itself or redis is not up for connections.")
+                        },
+                    }
+                    Ok(Json(response))
+                }
+                None => Err(AuthError::NotFound),
             }
-            None => Err(AuthError::NotFound),
         }
-    } else {
-        Err(AuthError::NotFound)
     }
 }

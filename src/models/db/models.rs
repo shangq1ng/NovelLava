@@ -1,36 +1,9 @@
-use crate::models::errors::models::DatabaseError;
+use bigdecimal::BigDecimal;
 use serde::Serialize;
-use sqlx::FromRow;
-use sqlx::types::Uuid;
-use sqlx::types::chrono::{DateTime, Utc};
-
-/// User Entity
-/// Maps 1:1 to our table 'users'
-#[derive(Debug, FromRow)]
-pub struct UserEntity {
-    pub id: Uuid,
-    pub sub: Option<String>,
-    pub provider: String,
-    pub username: String,
-    pub display_name: Option<String>,
-    pub email: String,
-    pub password: Option<String>,
-    pub avatar_url: Option<String>,
-    pub created_at: Option<DateTime<Utc>>,
-}
-/// Novel Entity
-/// Which maps 1:1 to our table 'novels'
-#[derive(Debug, FromRow)]
-pub struct NovelEntity {
-    pub id: Uuid,
-    pub author: String,
-    pub title: String,
-    pub cover_path: Option<String>,
-    pub description: Option<String>,
-    pub tags: Option<String>,
-    pub storage_path: Option<String>,
-    pub created_at: DateTime<Utc>,
-}
+use sqlx::types::chrono::{DateTime, NaiveDate, Utc};
+use uuid::Uuid;
+use crate::models::db::schema::{SeriesEntity, TitleStatus, UserEntity};
+use crate::models::errors::models::DatabaseError;
 
 /// UserResponse DTO
 /// that will be returned
@@ -62,20 +35,26 @@ impl TryFrom<UserEntity> for CreateUserResponse {
 #[derive(Debug, Serialize)]
 pub struct NovelQueryResponse {
     pub title: String,
-    pub author: String,
-    pub cover_path: String,
-    pub description: String,
-    pub tags: String,
+    pub slug: String,
+    pub description: Option<String>,
+    pub series_type_slug: Option<String>,
+    pub rating: Option<BigDecimal>,
+    pub release_date: Option<NaiveDate>,
+    pub status: Option<TitleStatus>,
+    pub updated_at: Option<DateTime<Utc>>,
 }
 
-impl From<NovelEntity> for NovelQueryResponse {
-    fn from(value: NovelEntity) -> Self {
+impl From<SeriesEntity> for NovelQueryResponse {
+    fn from(value: SeriesEntity) -> Self {
         Self {
             title: value.title,
-            author: value.author,
-            cover_path: value.cover_path.unwrap_or_default(),
-            description: value.description.unwrap_or_default(),
-            tags: value.tags.unwrap_or_default(),
+            slug: value.slug,
+            description: value.description,
+            series_type_slug: value.series_type_slug,
+            rating: value.rating.unwrap_or_default().into(),
+            release_date: value.release_date.unwrap_or_default().into(),
+            status: Some(value.status),
+            updated_at: value.updated_at,
         }
     }
 }

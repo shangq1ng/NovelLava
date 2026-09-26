@@ -1,5 +1,5 @@
 [*.sh]
-indent_styles = space
-indent_sizes = 2
-switch_case_indent = true
-space_redirects = true
+indent_size = 2
+indent_style = space
+trim_trailing_whitespace = true
+tab_width = unset
