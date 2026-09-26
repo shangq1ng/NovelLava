@@ -1,4 +1,3 @@
-CREATE TYPE content_type AS ENUM ('everyone', 'teen', 'mature', 'adult');
 CREATE TYPE title_status AS ENUM ('OnGoing', 'Completed', 'Hiatus', 'Cancelled', 'Dropped');
 
 CREATE TABLE series (
@@ -9,7 +8,6 @@ CREATE TABLE series (
     rating NUMERIC(3,2),
     release_date DATE,
     status title_status,
-    content_rating content_type,
     updated_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     CONSTRAINT titles_rating_range CHECK (rating IS NULL OR rating BETWEEN 0 AND 5)
@@ -44,18 +42,6 @@ CREATE TABLE chapters (
     updated_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-
-
-
-
-
-
-
-
-
-
-
-
 
 CREATE TABLE covers (
   s3_path TEXT NOT NULL,
