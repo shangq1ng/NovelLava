@@ -44,7 +44,7 @@ pub async fn app() -> anyhow::Result<()> {
     let logged_in_ratelimit_cfg = Arc::new(
         GovernorConfigBuilder::default()
             .key_extractor(SmartExtractor)
-            .per_millisecond(15)
+            .per_millisecond(1110)
             .burst_size(25)
             .finish()
             .ok_or(anyhow::anyhow!("Failed to build rate limiter"))?,
@@ -52,7 +52,7 @@ pub async fn app() -> anyhow::Result<()> {
     let anon_ratelimit_cfg = Arc::new(
         GovernorConfigBuilder::default()
             .key_extractor(SmartExtractor)
-            .per_millisecond(10)
+            .per_millisecond(333)
             .burst_size(10)
             .finish()
             .ok_or(anyhow::anyhow!("Failed to build rate limiter"))?,
