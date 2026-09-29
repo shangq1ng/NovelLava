@@ -1,9 +1,9 @@
+use crate::models::db::schema::{ChaptersEntity, SeriesEntity, TitleStatus, UserEntity};
+use crate::models::errors::models::DatabaseError;
 use bigdecimal::BigDecimal;
 use serde::Serialize;
 use sqlx::types::chrono::{DateTime, NaiveDate, Utc};
 use uuid::Uuid;
-use crate::models::db::schema::{SeriesEntity, TitleStatus, UserEntity};
-use crate::models::errors::models::DatabaseError;
 
 /// UserResponse DTO
 /// that will be returned
@@ -57,4 +57,36 @@ impl From<SeriesEntity> for NovelQueryResponse {
             updated_at: value.updated_at,
         }
     }
+}
+
+#[derive(Debug, Serialize)]
+pub struct ChapterDTO {
+    pub slug: String,
+    pub title: String,
+    pub number: Option<BigDecimal>,
+    pub s3_path: String,
+    pub updated_at: Option<DateTime<Utc>>,
+}
+
+impl From<ChaptersEntity> for ChapterDTO {
+    fn from(entity: ChaptersEntity) -> Self {
+        Self {
+            slug: entity.slug,
+            title: entity.title,
+            number: entity.number,
+            s3_path: entity.s3_path,
+            updated_at: entity.updated_at,
+        }
+    }
+}
+
+// DTOs so users can search other users by their username
+// Without revealing those searched user's private informations like emails, etc
+// without their consent.
+#[derive(Debug, Serialize)]
+pub struct RandomUserDTO {
+    pub username: String,
+    pub display_name: Option<String>,
+    pub avatar_url: String,
+    pub bio: Option<String>,
 }

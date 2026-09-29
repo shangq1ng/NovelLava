@@ -43,14 +43,38 @@ impl IntoResponse for CacheError {
 pub enum MiddlewareError {
     #[error("{0}")]
     TooManyRequests(String),
+    #[error(transparent)]
+    Other(#[from] anyhow::Error),
+    #[error(transparent)]
+    TowerSessionError(#[from] tower_sessions::session::Error),
+    #[error("Not Found")]
+    NotFound,
+    #[error(transparent)]
+    UuidError(#[from] uuid::Error),
 }
 
 impl IntoResponse for MiddlewareError {
     fn into_response(self) -> Response {
         let status_code = match self {
             Self::TooManyRequests(e) => {
-                tracing::debug!("{e:?}``");
+                error!("{e:?}``");
                 StatusCode::TOO_MANY_REQUESTS
+            }
+            Self::Other(e) => {
+                error!("Other Error{e:?}``");
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
+            Self::UuidError(e) => {
+                error!("UUID Error {e:?}``");
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
+            Self::NotFound => {
+                dbg!(self);
+                StatusCode::NOT_FOUND
+            }
+            Self::TowerSessionError(e) => {
+                error!("Tower Session Error: {e:?}");
+                StatusCode::INTERNAL_SERVER_ERROR
             }
         };
         status_code.into_response()
@@ -58,6 +82,8 @@ impl IntoResponse for MiddlewareError {
 }
 #[derive(Debug, Error)]
 pub enum DatabaseError {
+    #[error(transparent)]
+    TowerSessionError(#[from] tower_sessions::session::Error),
     #[error("Not Found")]
     NotFound,
     #[error(transparent)]
@@ -69,6 +95,10 @@ pub enum DatabaseError {
 impl IntoResponse for DatabaseError {
     fn into_response(self) -> Response {
         let status = match self {
+            Self::TowerSessionError(e) => {
+                tracing::error!("Tower Session Error {e:?}``");
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
             Self::NotFound => StatusCode::NOT_FOUND,
             Self::SqlxError(e) => {
                 error!("SQLx error: {}", e);

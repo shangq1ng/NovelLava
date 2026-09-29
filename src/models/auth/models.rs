@@ -1,5 +1,4 @@
 use crate::models::db::schema::UserEntity;
-use askama::Template;
 use axum::extract::FromRef;
 use oauth2::{EndpointNotSet, EndpointSet};
 use serde::{Deserialize, Serialize};
@@ -46,7 +45,7 @@ pub struct SignUpRequest {
     pub display_name: Option<String>,
     #[validate(email)]
     pub email: String,
-    #[validate(length(max = 8))]
+    #[validate(length(min = 8, max = 32))]
     pub password: String,
     pub avatar_url: Option<String>,
 }
@@ -67,6 +66,7 @@ pub struct User {
     pub id: Uuid,
     pub username: String,
     pub display_name: Option<String>,
+    pub bio: Option<String>,
     pub email: String,
     pub avatar_url: Option<String>,
 }
@@ -78,25 +78,14 @@ impl From<UserEntity> for User {
             username: entity.username,
             display_name: entity.display_name,
             email: entity.email,
+            bio: entity.bio,
             avatar_url: entity.avatar_url,
         }
     }
 }
 
-#[derive(Template)]
-#[template(path = "sign-up.html")]
-pub struct SignUpPage {
-    pub error_msg: Option<String>,
-}
-
-#[derive(Template)]
-#[template(path = "log-in.html")]
-pub struct SignInPage {
-    pub error_msg: Option<String>,
-}
-
-#[derive(Template)]
-#[template(path = "home.html")]
-pub struct HomePage {
-    pub error_msg: Option<String>,
+#[derive(Deserialize)]
+pub struct UpateUserDTO {
+    pub display_name: Option<String>,
+    pub bio: Option<String>,
 }

@@ -11,6 +11,7 @@ pub struct UserEntity {
     pub username: String,
     pub display_name: Option<String>,
     pub email: String,
+    pub bio: Option<String>,
     pub password: Option<String>,
     pub avatar_url: Option<String>,
     pub created_at: Option<DateTime<Utc>>,
@@ -37,19 +38,6 @@ pub struct SeriesEntity {
     pub status: TitleStatus,
     pub updated_at: Option<DateTime<Utc>>,
     pub created_at: DateTime<Utc>,
-}
-
-#[derive(Debug, FromRow)]
-pub struct SeriesAuthors {
-    pub series_id: Uuid,
-    pub author_slug: String,
-    pub role: Option<String>,
-}
-
-#[derive(Debug, FromRow)]
-pub struct SeriesGenres {
-    series_id: Uuid,
-    genre_slug: String,
 }
 
 #[derive(Debug, FromRow)]
@@ -86,7 +74,7 @@ pub struct ChaptersEntity {
     pub id: Uuid,
     pub slug: String,
     pub title: String,
-    pub number: Option<i64>,
+    pub number: Option<BigDecimal>,
     pub s3_path: String,
     pub updated_at: Option<DateTime<Utc>>,
     pub created_at: DateTime<Utc>,

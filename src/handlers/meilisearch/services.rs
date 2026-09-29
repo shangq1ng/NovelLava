@@ -11,30 +11,77 @@ pub async fn search(
 ) -> Result<Json<SearchResults<MeilisearchResult>>, SearchError> {
     let client = config.meilisearch.meilisearch.index("series");
     let mut search = client.search();
-    let SearchQuery { q, per_page, page, filter_by_author, filter_by_tags, filter_by_genres, filter_by_series_type } = query;
-    search.with_page(page.unwrap_or(1)).with_hits_per_page(per_page.unwrap_or(20));
+    let SearchQuery {
+        q,
+        per_page,
+        page,
+        author,
+        tags,
+        genres,
+        series,
+        slug,
+    } = query;
+    search
+        .with_page(page.unwrap_or(1))
+        .with_hits_per_page(per_page.unwrap_or(20));
 
     if let Some(v) = &q {
-        search.with_query(v.as_str());
+        search.with_query(v);
     }
 
-    if let Some(v) = &filter_by_tags {
-        search.with_filter(v.as_str());
+    if let Some(v) = &slug
+        && is_valid(v)
+    {
+        let filter = format!("slug = {}", v).to_string();
+        let mut search_once = client.search();
+        let author = search_once.with_filter(filter.as_str()).execute().await?;
+        return Ok(author.into());
     }
 
-    if let Some(v) = &filter_by_genres {
-        search.with_filter(v.as_str());
+    if let Some(v) = &tags
+        && is_valid(v)
+    {
+        let filter = format!("tag_slugs = {}", v).to_string();
+        let mut search_once = client.search();
+        let author = search_once.with_filter(filter.as_str()).execute().await?;
+        return Ok(author.into());
     }
 
-    if let Some(v) = &filter_by_author {
-        search.with_filter(v.as_str());
+    if let Some(v) = &genres
+        && is_valid(v)
+    {
+        let filter = format!("genre_slugs = {}", v).to_string();
+        let mut search_once = client.search();
+        let author = search_once.with_filter(filter.as_str()).execute().await?;
+        return Ok(author.into());
     }
 
-    if let Some(v) = &filter_by_series_type {
-        search.with_filter(v.as_str());
+    if let Some(v) = &author
+        && is_valid(v)
+    {
+        let filter = format!("author_slugs = {}", v).to_string();
+        let mut search_once = client.search();
+        let author = search_once.with_filter(filter.as_str()).execute().await?;
+        return Ok(author.into());
+    }
+
+    if let Some(v) = &series
+        && is_valid(v)
+    {
+        let filter = format!("series_type_slug = {}", v).to_string();
+        let mut search_once = client.search();
+        let author = search_once.with_filter(filter.as_str()).execute().await?;
+        return Ok(author.into());
     }
 
     let result = search.execute().await?;
 
     Ok(Json(result))
+}
+
+pub fn is_valid(v: &str) -> bool {
+    !v.is_empty()
+        && v.len() <= 128
+        && v.chars()
+            .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-')
 }

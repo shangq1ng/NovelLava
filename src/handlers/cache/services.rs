@@ -4,7 +4,11 @@ use crate::models::errors::models::CacheError;
 use deadpool_redis::redis::AsyncTypedCommands;
 use tracing::warn;
 
-pub async fn insert_user(config: &AppConfig, user: &User, key: &str) -> Result<Option<bool>, CacheError> {
+pub async fn insert_user(
+    config: &AppConfig,
+    user: &User,
+    key: &str,
+) -> Result<Option<bool>, CacheError> {
     let mut conn = config.cache.get_connection().await?;
     let usr = serde_json::to_string(&user)?;
     if let Err(e) = conn.set(key, usr).await {

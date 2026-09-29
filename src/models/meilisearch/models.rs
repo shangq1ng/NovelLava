@@ -1,18 +1,16 @@
 use serde::{Deserialize, Serialize};
 use sqlx::types::chrono::{DateTime, Utc};
-use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct MeilisearchResult {
-    pub slug: String,
-    pub series_type_slug: String,
-    pub updated_at: DateTime<Utc>,
-    pub created_at: DateTime<Utc>,
-    pub author_slugs: Vec<String>,
-    pub genre_slugs: Vec<String>,
+    pub slug: Option<String>,
+    pub series_type_slug: Option<String>,
+    pub updated_at: Option<DateTime<Utc>>,
+    pub author_slugs: Option<Vec<String>>,
+    pub genre_slugs: Option<Vec<String>>,
     pub tags_slugs: Option<Vec<String>>,
     pub release_date: Option<DateTime<Utc>>,
-    pub title: String,
+    pub title: Option<String>,
     pub cover_path: Option<String>,
     pub description: Option<String>,
     pub rating: Option<f64>,
@@ -22,11 +20,12 @@ pub struct MeilisearchResult {
 #[derive(Debug, Deserialize)]
 pub struct SearchQuery {
     pub q: Option<String>,
+    pub slug: Option<String>,
+    #[serde(rename = "hitsPerPage")]
     pub per_page: Option<usize>,
     pub page: Option<usize>,
-    pub filter_by_author: Option<String>,
-    pub filter_by_tags: Option<String>,
-    pub filter_by_genres: Option<String>,
-    pub filter_by_series_type: Option<String>,
+    pub author: Option<String>,
+    pub tags: Option<String>,
+    pub genres: Option<String>,
+    pub series: Option<String>,
 }
-
