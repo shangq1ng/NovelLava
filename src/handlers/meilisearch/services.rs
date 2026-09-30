@@ -1,9 +1,11 @@
+use crate::handlers::cache::services::{get_paginated_results, insert_paginated_results};
 use crate::models::config::models::AppConfig;
 use crate::models::errors::models::SearchError;
 use crate::models::meilisearch::models::{MeilisearchResult, SearchQuery};
 use axum::extract::Json;
 use axum::extract::{Query, State};
 use meilisearch_sdk::search::SearchResults;
+use tracing::warn;
 
 pub async fn search(
     State(config): State<AppConfig>,
@@ -21,9 +23,6 @@ pub async fn search(
         series,
         slug,
     } = query;
-    search
-        .with_page(page.unwrap_or(1))
-        .with_hits_per_page(per_page.unwrap_or(20));
 
     if let Some(v) = &q {
         search.with_query(v);
@@ -74,9 +73,30 @@ pub async fn search(
         return Ok(author.into());
     }
 
+    let cache_key = format!(
+        "search:v1:browse:{}:{}",
+        page.unwrap_or_default(), per_page.unwrap_or_default(),
+    );
+    if let Ok(v) = get_paginated_results(&config, cache_key.as_str()).await {
+        let val = serde_json::from_str(v.as_str())?;
+        return Ok(Json(val));
+    } else {
+        search
+            .with_page(page.unwrap_or(1))
+            .with_hits_per_page(per_page.unwrap_or(20));
+    }
+
     let result = search.execute().await?;
 
-    Ok(Json(result))
+    if check_if_query_for_pagination(&page, &per_page) == true {
+        insert_paginated_results(&config, cache_key.as_str(), &result)
+            .await
+            .map_err(|e| warn!("Cache Error: {e:?}"))
+            .unwrap_or_default();
+        Ok(Json(result))
+    } else {
+        Ok(Json(result))
+    }
 }
 
 pub fn is_valid(v: &str) -> bool {
@@ -84,4 +104,12 @@ pub fn is_valid(v: &str) -> bool {
         && v.len() <= 128
         && v.chars()
             .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-')
+}
+
+pub fn check_if_query_for_pagination(page: &Option<usize>, per_page: &Option<usize>) -> bool {
+    if page.is_some() || per_page.is_some() {
+        true
+    } else {
+        false
+    }
 }

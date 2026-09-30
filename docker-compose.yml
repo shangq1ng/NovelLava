@@ -33,6 +33,11 @@ services:
     image: redis:8.10.0-alpine
     container_name: redis-cache
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: '512M'
     command: >
       redis-server
       --requirepass ${CACHE_REDIS_PASSWORD}
@@ -41,7 +46,7 @@ services:
     environment:
       - TZ=UTC
     ports:
-      - '6380:6380'
+      - '6380:6379'
     volumes:
       - cache_redis_data:/data
   meilisearch:

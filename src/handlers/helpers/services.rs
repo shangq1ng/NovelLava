@@ -28,14 +28,13 @@ pub async fn check_if_logged_in(
                 req.extensions_mut().insert(AuthenticatedUser(id));
                 Ok(next.run(req).await)
             } else {
-                req.extensions_mut()
-                    .insert(AnonymousUser(addr.ip()));
+                req.extensions_mut().insert(AnonymousUser(addr.ip()));
                 Ok(next.run(req).await)
             }
         }
         None => {
             req.extensions_mut().insert(AnonymousUser(addr.ip()));
             Ok(next.run(req).await)
-        },
+        }
     }
 }

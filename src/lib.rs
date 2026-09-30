@@ -84,9 +84,9 @@ pub async fn app() -> anyhow::Result<()> {
     let api: Router = Router::new()
         .route("/search/{username}", get(find_users_by_username))
         .route("/search", get(search))
-        .layer(GovernorLayer::new(logged_in_ratelimit_cfg))
-        .layer(GovernorLayer::new(anon_ratelimit_cfg))
-        .layer(axum::middleware::from_fn(check_if_logged_in))
+       .layer(GovernorLayer::new(logged_in_ratelimit_cfg))
+       .layer(GovernorLayer::new(anon_ratelimit_cfg))
+       .layer(axum::middleware::from_fn(check_if_logged_in))
         .layer(cors_conf)
         .layer(session_redis.clone())
         .layer(

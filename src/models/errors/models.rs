@@ -116,6 +116,8 @@ impl IntoResponse for DatabaseError {
 
 #[derive(Debug, Error)]
 pub enum SearchError {
+    #[error(transparent)]
+    SerdeConversionError(#[from] serde_json::Error),
     #[error("{0}")]
     Internal(#[source] anyhow::Error),
     #[error("Not Found")]
@@ -131,6 +133,10 @@ pub enum SearchError {
 impl IntoResponse for SearchError {
     fn into_response(self) -> Response {
         let status = match self {
+            Self::SerdeConversionError(e) => {
+                error!("serde conversion error: {}", e);
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
             Self::MeiliError(e) => {
                 error!("{}", e);
                 StatusCode::INTERNAL_SERVER_ERROR

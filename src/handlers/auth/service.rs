@@ -1,5 +1,4 @@
 use crate::handlers::auth::helpers::{hash_password, verify_password};
-use crate::handlers::cache::services::{get_user, insert_user};
 use crate::models::auth::models::{SignUpRequest, User};
 use crate::models::config::models::AppConfig;
 use crate::models::db::schema::UserEntity;
@@ -88,41 +87,17 @@ pub async fn me(State(state): State<AppConfig>, session: Session) -> Result<Json
         .await
         .map_err(AuthError::SessionError)?
         .ok_or(AuthError::NotFound)?;
-    let usr = get_user(&state, session.to_string().as_str())
-        .await
-        .unwrap_or_default();
-    match usr {
-        Some(usr) => Ok(Json(usr)),
-        None => {
-            let user = sqlx::query_as!(
+    let user = sqlx::query_as!(
             UserEntity,
             "SELECT id, sub, username, display_name, bio, email, avatar_url, provider, password, created_at FROM users WHERE id = $1",
             session
         ).fetch_optional(&state.database.db).await?;
 
-            match user {
-                Some(user) => {
-                    let response = user.into();
-                    let is_success = insert_user(&state, &response, session.to_string().as_str())
-                        .await
-                        .unwrap_or(Some(false));
-                    match is_success {
-                        Some(true) => {
-                            // do nothing
-                        }
-                        Some(false) => {
-                            error!("Failed to insert user")
-                        }
-                        None => {
-                            error!(
-                                "It didn't insert, nor did it failed to insert. Something's wrong with the logic itself or redis is not up for connections."
-                            )
-                        }
-                    }
-                    Ok(Json(response))
-                }
-                None => Err(AuthError::NotFound),
-            }
+    match user {
+        Some(user) => {
+            let response = user.into();
+            Ok(Json(response))
         }
+        None => Err(AuthError::NotFound),
     }
 }

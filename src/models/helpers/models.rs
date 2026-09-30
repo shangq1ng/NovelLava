@@ -24,7 +24,7 @@ impl KeyExtractor for SmartExtractor {
             return Ok(UserType::LoggedUser(v));
         };
 
-        if let Some(v) = req.extensions().get::<AnonymousUser>().map(|user| user.0 ) {
+        if let Some(v) = req.extensions().get::<AnonymousUser>().map(|user| user.0) {
             Ok(UserType::Anon(v))
         } else {
             Err(GovernorError::UnableToExtractKey)
