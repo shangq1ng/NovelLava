@@ -1,10 +1,44 @@
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
+use axum_extra::extract::multipart::MultipartError;
 use deadpool_redis::redis::RedisError;
 use thiserror::Error;
 use tracing::error;
 
 //TODO: Fix Status-Code semantic, refactor so not every error is 404/500/etc.
+
+#[derive(Error, Debug)]
+pub enum S3ObjectError {
+    #[error(transparent)]
+    S3Error(#[from] opendal::Error),
+    #[error("Failed Operation")]
+    Failed,
+    #[error(transparent)]
+    Other(#[from] anyhow::Error),
+    #[error(transparent)]
+    SerdeJson(#[from] serde_json::Error),
+}
+
+impl IntoResponse for S3ObjectError {
+    fn into_response(self) -> Response {
+        let status = match self {
+            S3ObjectError::SerdeJson(e) => {
+                error!("Serde Json: {}", e);
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
+            Self::S3Error(e) => {
+                error!("S3 Error: {e:?}");
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
+            Self::Failed => StatusCode::UNPROCESSABLE_ENTITY, // change to an appropriate status code at a later date.
+            Self::Other(e) => {
+                error!("Unexpected error: {e}");
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
+        };
+        status.into_response()
+    }
+}
 
 #[derive(Error, Debug)]
 pub enum CacheError {
@@ -83,6 +117,8 @@ impl IntoResponse for MiddlewareError {
 #[derive(Debug, Error)]
 pub enum DatabaseError {
     #[error(transparent)]
+    MultipartError(#[from] MultipartError),
+    #[error(transparent)]
     TowerSessionError(#[from] tower_sessions::session::Error),
     #[error("Not Found")]
     NotFound,
@@ -95,8 +131,12 @@ pub enum DatabaseError {
 impl IntoResponse for DatabaseError {
     fn into_response(self) -> Response {
         let status = match self {
+            Self::MultipartError(e) => {
+                error!("Multipart Error: {e:?}");
+                StatusCode::BAD_REQUEST
+            }
             Self::TowerSessionError(e) => {
-                tracing::error!("Tower Session Error {e:?}``");
+                error!("Tower Session Error {e:?}``");
                 StatusCode::INTERNAL_SERVER_ERROR
             }
             Self::NotFound => StatusCode::NOT_FOUND,

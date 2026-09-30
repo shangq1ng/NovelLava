@@ -1,4 +1,5 @@
 use crate::models::cache::models::Cache;
+use crate::models::s3::models::S3BucketOperator;
 use anyhow::{Context, Result};
 use meilisearch_sdk::client::Client;
 use sqlx::postgres::{PgPool, PgPoolOptions};
@@ -9,6 +10,7 @@ pub struct AppConfig {
     pub database: DatabaseConfig,
     pub meilisearch: MeilisearchConfig,
     pub cache: Cache,
+    pub s3: S3BucketOperator,
 }
 
 #[derive(Clone, Debug)]

@@ -60,8 +60,22 @@ services:
     volumes:
       - ./meilisearch_data:/meili_data
 
+  localstack:
+    image: localstack/localstack:stable
+    container_name: localstack
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:4566:4566'
+    environment:
+      SERVICES: ${SERVICE_NAME}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+      LOCALSTACK_AUTH_TOKEN: ${LOCALSTACK_AUTH_TOKEN}
+    volumes:
+      - ./localstack/init:/etc/localstack/init/ready.d
+
 volumes:
   pg_data:
   session_redis_data:
   meilisearch_data:
   cache_redis_data:
+

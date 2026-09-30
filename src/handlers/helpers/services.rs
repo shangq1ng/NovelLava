@@ -2,6 +2,7 @@ use crate::models::errors::models::MiddlewareError;
 use axum::extract::{ConnectInfo, Request};
 use axum::middleware::Next;
 use axum::response::Response;
+use bytes::Bytes;
 use std::net::{IpAddr, SocketAddr};
 use tower_sessions::Session;
 use uuid::Uuid;
@@ -38,4 +39,12 @@ pub async fn check_if_logged_in(
             Ok(next.run(req).await)
         }
     }
+}
+
+pub async fn format_avatar(avatar: Bytes) -> Result<Vec<u8>, image::ImageError> {
+    let img = image::load_from_memory(&*avatar);
+    let img = img?.resize_to_fill(256, 256, image::imageops::FilterType::Lanczos3);
+    let mut buf = std::io::Cursor::new(Vec::new());
+    img.write_to(&mut buf, image::ImageFormat::Png)?;
+    Ok(buf.into_inner())
 }

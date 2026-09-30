@@ -1,3 +1,4 @@
+use crate::handlers::s3::services::upload_avatar;
 use crate::models::auth::models::{UpateUserDTO, User};
 use crate::models::config::models::AppConfig;
 use crate::models::db::models::{ChapterDTO, RandomUserDTO};
@@ -5,6 +6,7 @@ use crate::models::db::schema::{ChaptersEntity, UserEntity};
 use crate::models::errors::models::DatabaseError;
 use axum::extract::{Path, State};
 use axum::{Form, Json};
+use axum_extra::extract::Multipart;
 use tower_sessions::Session;
 use uuid::Uuid;
 
@@ -119,4 +121,42 @@ pub async fn update_bio(
     } else {
         Err(DatabaseError::NotFound)
     }
+}
+
+pub async fn update_avatar(
+    State(config): State<AppConfig>,
+    session: Session,
+    mut payload: Multipart,
+) -> Result<Json<User>, DatabaseError> {
+    let id = session
+        .get::<Uuid>("user_id")
+        .await
+        .map_err(DatabaseError::TowerSessionError)?
+        .ok_or(DatabaseError::NotFound)?;
+
+    while let Some(field) = payload.next_field().await? {
+        let avatar = field.bytes().await?;
+        if !avatar.is_empty() {
+            if upload_avatar(&config, id, avatar).await.is_ok() {
+                let avatar_url = format!("novellava/avatars/{}.png", id);
+                let query = sqlx::query_as!(
+                    UserEntity,
+                    "UPDATE users SET avatar_url = $1 WHERE id = $2 RETURNING *;",
+                    avatar_url,
+                    id
+                )
+                    .fetch_optional(&config.database.db)
+                    .await?;
+
+                return match query {
+                    Some(usr) => {
+                        let res = usr.into();
+                        Ok(Json(res))
+                    }
+                    None => Err(DatabaseError::NotFound)
+                }
+            }
+        }
+    }
+    Err(DatabaseError::NotFound)
 }

@@ -1,11 +1,14 @@
 use crate::handlers::auth::service::{me, sign_in, sign_up};
-use crate::handlers::db::services::{find_users_by_username, update_bio, update_display_name};
+use crate::handlers::db::services::{
+    find_users_by_username, update_avatar, update_bio, update_display_name,
+};
 use crate::handlers::helpers::services::check_if_logged_in;
 use crate::handlers::meilisearch::services::search;
 use crate::handlers::sessions::services::start_session_redis;
 use crate::models::cache::models::Cache;
 use crate::models::config::models::{AppConfig, DatabaseConfig, MeilisearchConfig};
 use crate::models::helpers::models::SmartExtractor;
+use crate::models::s3::models::S3BucketOperator;
 use axum::Router;
 use axum::http::header::{ACCEPT, AUTHORIZATION};
 use axum::http::{HeaderValue, Method};
@@ -75,11 +78,13 @@ pub async fn app() -> anyhow::Result<()> {
     let cache = Cache::new().await?;
     let session_redis = start_session_redis().await?;
     let db = DatabaseConfig::new().await?;
+    let op = S3BucketOperator::new().await?;
     let meilisearch = MeilisearchConfig::new().await?;
     let state = AppConfig {
         database: db,
         meilisearch,
         cache,
+        s3: op,
     };
     let api: Router = Router::new()
         .route("/search/{username}", get(find_users_by_username))
@@ -103,6 +108,7 @@ pub async fn app() -> anyhow::Result<()> {
         .route("/users/me", get(me))
         .route("/users/me/display-name", post(update_display_name))
         .route("/users/me/bio", post(update_bio))
+        .route("/users/me/avatar", post(update_avatar))
         .layer(GovernorLayer::new(auth_governer))
         .layer(session_redis.clone())
         .layer(

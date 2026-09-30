@@ -88,4 +88,5 @@ impl From<UserEntity> for User {
 pub struct UpateUserDTO {
     pub display_name: Option<String>,
     pub bio: Option<String>,
+    pub avatar_url: Option<String>,
 }

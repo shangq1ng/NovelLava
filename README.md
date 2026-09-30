@@ -4,7 +4,7 @@
 ![SQLx](https://img.shields.io/badge/sqlx-0.9-blue)
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue)
 
-> Work in progress!
+> Check images/ for demo screenshots.
 
 # LICENSE
 Apache-2.0

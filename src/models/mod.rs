@@ -5,3 +5,5 @@ pub mod db;
 pub mod errors;
 pub mod helpers;
 pub mod meilisearch;
+
+pub mod s3;

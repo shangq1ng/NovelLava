@@ -15,7 +15,6 @@ dotenv = "0.15.0"
 meilisearch-sdk = "0.33.0"
 oauth2 = { version = "5.0.0", features = ["default", "reqwest"] }
 reqwest = { version = "=0.12.28", features = ["json"] } # Conflcts with oauth2 if reqwest version = 0.13.5
-rust-s3 = "0.37.2"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.151"
 sqlx = { version = "0.9.0", features = ["postgres", "chrono", "uuid", "derive", "runtime-tokio", "macros", "bigdecimal"] }
@@ -30,8 +29,11 @@ validator = { version = "0.21.0", features = ["derive"] }
 uuid = "1.26.1"
 deadpool-redis = "0.23.1"
 tower_governor = { version = "0.8.0", features = ["axum"], default-features = false }
-walkdir = "2.5.0"
 bigdecimal = { version = "0.4.10", features = ["serde"] }
+opendal = { version = "0.59.3", features = ["layers-logging", "services-s3"] }
+image = { version = "0.25.10", default-features = false, features = ["jpeg", "png", "webp"] }
+axum-extra = { version = "0.12.6", features = ["multipart"] }
+bytes = "1.12.1"
 
 
 [profile.release]
