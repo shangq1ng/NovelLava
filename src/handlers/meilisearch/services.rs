@@ -75,7 +75,8 @@ pub async fn search(
 
     let cache_key = format!(
         "search:v1:browse:{}:{}",
-        page.unwrap_or_default(), per_page.unwrap_or_default(),
+        page.unwrap_or_default(),
+        per_page.unwrap_or_default(),
     );
     if let Ok(v) = get_paginated_results(&config, cache_key.as_str()).await {
         let val = serde_json::from_str(v.as_str())?;
@@ -88,7 +89,7 @@ pub async fn search(
 
     let result = search.execute().await?;
 
-    if check_if_query_for_pagination(&page, &per_page) == true {
+    if check_if_query_for_pagination(&page, &per_page) {
         insert_paginated_results(&config, cache_key.as_str(), &result)
             .await
             .map_err(|e| warn!("Cache Error: {e:?}"))
@@ -107,9 +108,5 @@ pub fn is_valid(v: &str) -> bool {
 }
 
 pub fn check_if_query_for_pagination(page: &Option<usize>, per_page: &Option<usize>) -> bool {
-    if page.is_some() || per_page.is_some() {
-        true
-    } else {
-        false
-    }
+    page.is_some() || per_page.is_some()
 }

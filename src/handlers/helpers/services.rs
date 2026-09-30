@@ -22,6 +22,7 @@ pub async fn check_if_logged_in(
 
     let id = session.get::<Uuid>("user_id").await?;
     let nill = Uuid::nil();
+    #[allow(clippy::collapsible_match)]
     match id {
         Some(id) => {
             if id != nill {
