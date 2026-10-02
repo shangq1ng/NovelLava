@@ -136,26 +136,24 @@ pub async fn update_avatar(
 
     while let Some(field) = payload.next_field().await? {
         let avatar = field.bytes().await?;
-        if !avatar.is_empty() {
-            if upload_avatar(&config, id, avatar).await.is_ok() {
-                let avatar_url = format!("novellava/avatars/{}.png", id);
-                let query = sqlx::query_as!(
-                    UserEntity,
-                    "UPDATE users SET avatar_url = $1 WHERE id = $2 RETURNING *;",
-                    avatar_url,
-                    id
-                )
-                    .fetch_optional(&config.database.db)
-                    .await?;
+        if !avatar.is_empty() && upload_avatar(&config, id, avatar).await.is_ok() {
+            let avatar_url = format!("novellava/avatars/{}.png", id);
+            let query = sqlx::query_as!(
+                UserEntity,
+                "UPDATE users SET avatar_url = $1 WHERE id = $2 RETURNING *;",
+                avatar_url,
+                id
+            )
+            .fetch_optional(&config.database.db)
+            .await?;
 
-                return match query {
-                    Some(usr) => {
-                        let res = usr.into();
-                        Ok(Json(res))
-                    }
-                    None => Err(DatabaseError::NotFound)
+            return match query {
+                Some(usr) => {
+                    let res = usr.into();
+                    Ok(Json(res))
                 }
-            }
+                None => Err(DatabaseError::NotFound),
+            };
         }
     }
     Err(DatabaseError::NotFound)

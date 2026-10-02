@@ -95,5 +95,5 @@ pub struct ReviewsEntity {
     pub child_id: Option<Uuid>,
     pub content: String,
     pub rating: Option<BigDecimal>,
-    pub created_at:DateTime<Utc>,
+    pub created_at: DateTime<Utc>,
 }

@@ -1,4 +1,6 @@
-use crate::models::db::schema::{ChaptersEntity, ReviewsEntity, SeriesEntity, TitleStatus, UserEntity};
+use crate::models::db::schema::{
+    ChaptersEntity, ReviewsEntity, SeriesEntity, TitleStatus, UserEntity,
+};
 use crate::models::errors::models::DatabaseError;
 use bigdecimal::BigDecimal;
 use serde::{Deserialize, Serialize};
@@ -158,10 +160,10 @@ impl From<ReviewsEntity> for ReviewResponseDTO {
             parent_id: entity.parent_id,
             content: entity.content.clone(),
             rating: entity.rating.unwrap_or_default(),
-            created_at: entity.created_at.clone(),
+            created_at: entity.created_at,
 
             // Child fields
-            child_id: entity.child_id.map(|e| return e),
+            child_id: entity.child_id,
             child_username: entity.username,
             child_content: entity.content,
             child_created_at: entity.created_at,

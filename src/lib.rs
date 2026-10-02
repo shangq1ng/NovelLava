@@ -1,4 +1,7 @@
 use crate::handlers::auth::service::{me, sign_in, sign_up};
+use crate::handlers::db::review::services::{
+    create_review, edit_review, get_all_child_reviews, get_all_reviews, reply_review,
+};
 use crate::handlers::db::services::{
     find_users_by_username, update_avatar, update_bio, update_display_name,
 };
@@ -24,7 +27,6 @@ use tracing::Level;
 use tracing_subscriber::fmt;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::prelude::*;
-use crate::handlers::db::review::services::{create_review, edit_review, get_all_child_reviews, get_all_reviews, reply_review};
 
 pub mod handlers;
 pub mod models;
