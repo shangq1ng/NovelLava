@@ -1,7 +1,7 @@
-use crate::models::db::schema::{ChaptersEntity, SeriesEntity, TitleStatus, UserEntity};
+use crate::models::db::schema::{ChaptersEntity, ReviewsEntity, SeriesEntity, TitleStatus, UserEntity};
 use crate::models::errors::models::DatabaseError;
 use bigdecimal::BigDecimal;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sqlx::types::chrono::{DateTime, NaiveDate, Utc};
 use uuid::Uuid;
 
@@ -81,7 +81,7 @@ impl From<ChaptersEntity> for ChapterDTO {
 }
 
 // DTOs so users can search other users by their username
-// Without revealing those searched user's private informations like emails, etc
+// Without revealing those searched user's private information like emails, etc.
 // without their consent.
 #[derive(Debug, Serialize)]
 pub struct RandomUserDTO {
@@ -89,4 +89,82 @@ pub struct RandomUserDTO {
     pub display_name: Option<String>,
     pub avatar_url: String,
     pub bio: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CreateReviewDTO {
+    pub username: Option<String>,
+    pub parent_id: Option<Uuid>,
+    pub child_id: Option<Uuid>,
+    pub novel_id: Uuid,
+    pub rating: Option<BigDecimal>,
+    pub content: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ReviewDTO {
+    pub id: Uuid,
+    pub username: String,
+    pub novel_id: Uuid,
+    pub parent_id: Uuid,
+    pub content: String,
+    pub child_id: Option<Uuid>,
+    pub rating: BigDecimal,
+    pub created_at: DateTime<Utc>,
+}
+
+impl From<ReviewsEntity> for ReviewDTO {
+    fn from(entity: ReviewsEntity) -> Self {
+        Self {
+            id: entity.id,
+            username: entity.username,
+            novel_id: entity.novel_id,
+            parent_id: entity.parent_id,
+            child_id: entity.child_id,
+            content: entity.content,
+            rating: entity.rating.unwrap_or_default(),
+            created_at: entity.created_at,
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct GetAllReviews {
+    pub novel: Uuid,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ReviewResponseDTO {
+    pub id: Uuid,
+    pub username: String,
+    pub novel_id: Uuid,
+    pub parent_id: Uuid,
+    pub content: String,
+    pub rating: BigDecimal,
+    pub created_at: DateTime<Utc>,
+    pub child_id: Option<Uuid>,
+    pub child_username: String,
+    pub child_content: String,
+    pub child_created_at: DateTime<Utc>,
+}
+
+impl From<ReviewsEntity> for ReviewResponseDTO {
+    fn from(entity: ReviewsEntity) -> Self {
+        Self {
+            // Parent fields
+            id: entity.id,
+            username: entity.username.clone(),
+            novel_id: entity.novel_id,
+            parent_id: entity.parent_id,
+            content: entity.content.clone(),
+            rating: entity.rating.unwrap_or_default(),
+            created_at: entity.created_at.clone(),
+
+            // Child fields
+            child_id: entity.child_id.map(|e| return e),
+            child_username: entity.username,
+            child_content: entity.content,
+            child_created_at: entity.created_at,
+        }
+    }
 }

@@ -34,6 +34,7 @@ opendal = { version = "0.59.3", features = ["layers-logging", "services-s3"] }
 image = { version = "0.25.10", default-features = false, features = ["jpeg", "png", "webp"] }
 axum-extra = { version = "0.12.6", features = ["multipart"] }
 bytes = "1.12.1"
+regex = "1.13.1"
 
 
 [profile.release]

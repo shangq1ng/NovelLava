@@ -85,3 +85,15 @@ pub struct CoversEntity {
     pub s3_path: String,
     pub content_type: Option<String>,
 }
+
+#[derive(Debug, FromRow)]
+pub struct ReviewsEntity {
+    pub id: Uuid,
+    pub username: String,
+    pub novel_id: Uuid,
+    pub parent_id: Uuid,
+    pub child_id: Option<Uuid>,
+    pub content: String,
+    pub rating: Option<BigDecimal>,
+    pub created_at:DateTime<Utc>,
+}

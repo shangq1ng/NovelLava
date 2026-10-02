@@ -116,6 +116,8 @@ impl IntoResponse for MiddlewareError {
 }
 #[derive(Debug, Error)]
 pub enum DatabaseError {
+    #[error("Failed to post comment/review")]
+    FailedToCreateReview,
     #[error(transparent)]
     MultipartError(#[from] MultipartError),
     #[error(transparent)]
@@ -131,6 +133,9 @@ pub enum DatabaseError {
 impl IntoResponse for DatabaseError {
     fn into_response(self) -> Response {
         let status = match self {
+            Self::FailedToCreateReview => {
+                StatusCode::UNPROCESSABLE_ENTITY
+            }
             Self::MultipartError(e) => {
                 error!("Multipart Error: {e:?}");
                 StatusCode::BAD_REQUEST

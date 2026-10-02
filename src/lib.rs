@@ -24,6 +24,7 @@ use tracing::Level;
 use tracing_subscriber::fmt;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::prelude::*;
+use crate::handlers::db::review::services::{create_review, edit_review, get_all_child_reviews, get_all_reviews, reply_review};
 
 pub mod handlers;
 pub mod models;
@@ -105,6 +106,11 @@ pub async fn app() -> anyhow::Result<()> {
     let auth: Router = Router::new()
         .route("/signup", post(sign_up))
         .route("/login", post(sign_in))
+        .route("/review", post(create_review))
+        .route("/review/reply", post(reply_review))
+        .route("/review/content", post(edit_review))
+        .route("/reviews", get(get_all_reviews))
+        .route("/reviews/child", get(get_all_child_reviews))
         .route("/users/me", get(me))
         .route("/users/me/display-name", post(update_display_name))
         .route("/users/me/bio", post(update_bio))

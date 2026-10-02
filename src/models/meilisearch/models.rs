@@ -1,8 +1,10 @@
 use serde::{Deserialize, Serialize};
 use sqlx::types::chrono::{DateTime, Utc};
+use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct MeilisearchResult {
+    pub id: Uuid,
     pub slug: Option<String>,
     pub series_type_slug: Option<String>,
     pub updated_at: Option<DateTime<Utc>>,
