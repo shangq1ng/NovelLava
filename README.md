@@ -21,10 +21,10 @@ image uploads, rate limiting, review, all built in Rust with Axum.
 - Docker Compose: Postgres, two Redis instances, LocalStack S3, Meilisearch
 
 ## Running it
-`cp env.example .env`
-`nano <Fill .env with your credentials>`
-`docker compose up`
-`cargo run --release --bin novellava`
+- `cp env.example .env`
+- `nano <Fill .env with your credentials>`
+- `docker compose up`
+- `cargo run --release --bin novellava`
 
 ## Demo
 
